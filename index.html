@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AmbroseUG — Everything Online</title>
+<style>
+  :root{
+    --gap:1rem; --radius:1rem; --brand:#ff6a00; --brand-2:#ffb86b;
+    --ink:#0b1324; --muted:#6b7280; --bg:#0e1220; --card:#0f172a;
+    --stroke:#1f2a44; --soft:#0b132422; --shadow:0 18px 60px rgba(0,0,0,.35);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:radial-gradient(1200px 800px at 10% -10%, #1b2340 0, #0e1220 46%, #0b0f1c 100%); color:#eaf0ff; }
+  a{ color:inherit; text-decoration:none; }
+  button,input,select{ font:inherit; }
+  .glow{ position:absolute; inset:-120px -120px auto auto; width:520px; height:520px; background:radial-gradient(closest-side, #ff6a00 0, transparent 70%); opacity:.12; filter:blur(40px); pointer-events:none; }
+
+  /* Topbar */
+  .topbar{
+    position:sticky; top:0; z-index:40; display:grid; grid-template-columns: 1fr minmax(260px,640px) auto; gap:.8rem;
+    align-items:center; padding:.9rem 1rem; border-bottom:1px solid var(--stroke);
+    background:linear-gradient(180deg, rgba(17,23,46,.86), rgba(14,18,32,.72));
+    backdrop-filter: blur(14px);
+  }
+  .brand{ display:flex; align-items:center; gap:.7rem; font-weight:900; letter-spacing:.2px; }
+  .badge-lg{ display:grid; place-items:center; width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg, #ff6a00, #ffd6a1); color:#111; font-size:1.2rem; box-shadow:0 8px 24px rgba(255,106,0,.45); }
+  .brand span{ color:#ffd6a1; }
+
+  /* Search */
+  .search{
+    display:flex; border:1px solid var(--stroke); border-radius:999px;
+    background:linear-gradient(180deg,#11182f,#0d1429); box-shadow:inset 0 0 0 1px #152146, 0 10px 26px rgba(5,8,18,.55);
+  }
+  .search input{ flex:1; border:0; outline:0; background:transparent; color:#eaf0ff; padding:.7rem 1rem; }
+  .search button{ border:0; background:transparent; color:#ffd6a1; padding:.45rem .8rem; cursor:pointer; }
+
+  /* Buttons */
+  .ghost{ border:1px solid var(--stroke); background:linear-gradient(180deg, #0e162e, #0b1324); color:#eaf0ff; padding:.55rem .95rem; border-radius:999px; cursor:pointer; }
+  .primary{ border:0; background:linear-gradient(135deg, var(--brand), var(--brand-2)); color:#111; padding:.6rem 1.05rem; border-radius:999px; cursor:pointer; font-weight:700; box-shadow:0 16px 36px rgba(255,106,0,.35); }
+  .cart{ border:1px solid var(--stroke); background:linear-gradient(180deg, #0e162e, #0b1324); padding:.5rem .85rem; border-radius:999px; position:relative; cursor:pointer; }
+  .account-nav{ display:flex; gap:.55rem; align-items:center; }
+  .badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border-radius:999px; font-size:.72rem; padding:.05rem .38rem; }
+
+  /* Category chips */
+  .categories{ display:flex; gap:.6rem; padding:.6rem 1rem; overflow:auto; scrollbar-width:none; }
+  .categories::-webkit-scrollbar{ display:none; }
+  .chip{ border:1px solid var(--stroke); background:linear-gradient(180deg,#0f172a,#0b1224); padding:.48rem .88rem; border-radius:999px; cursor:pointer; white-space:nowrap; transition:transform .15s ease, box-shadow .15s ease; box-shadow:0 6px 16px rgba(0,0,0,.25); }
+  .chip:hover{ transform:translateY(-1px); box-shadow:0 10px 22px rgba(0,0,0,.35); }
+  .chip.active{ background:linear-gradient(135deg,#ff6a00,#ffb86b); color:#111; border-color:transparent; }
+
+  /* Hero */
+  .hero{ position:relative; display:grid; grid-template-columns: 1.2fr .8fr; gap:1rem; align-items:center; min-height:44vh; padding:1.4rem 1rem; }
+  .hero-card{
+    position:relative; background:linear-gradient(180deg,#111a36,#0e152d); border:1px solid var(--stroke); border-radius:var(--radius);
+    padding:1.4rem; box-shadow:var(--shadow); animation:float 8s ease-in-out infinite;
+  }
+  .hero h1{ margin:.2rem 0 .4rem; line-height:1.05; font-size:clamp(1.7rem, 3.6vw, 3rem); }
+  .hero p{ color:#c9d6ff; }
+  .hero .cta{ display:inline-block; margin-top:.9rem; }
+  .hero-graphic{ position:relative; height:100%; min-height:260px; border-radius:var(--radius);
+    background:conic-gradient(from 140deg at 60% 40%, #1a2246, #0e142b, #1a2246); border:1px solid var(--stroke);
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .orb,.orb2{ position:absolute; width:60vmax; height:60vmax; border-radius:50%; filter:blur(28px); opacity:.55; mix-blend:screen; }
+  .orb{ left:-24vmax; top:-14vmax; background:radial-gradient(circle at 30% 30%, #ff6a00 0, transparent 60%); animation:drift 22s linear infinite; }
+  .orb2{ right:-26vmax; bottom:-20vmax; background:radial-gradient(circle at 70% 70%, #ffb86b 0, transparent 64%); animation:drift 28s linear infinite reverse; }
+  @keyframes float{ 0%,100%{ transform: translateY(0)} 50%{ transform: translateY(-6px)} }
+  @keyframes drift{ from{ transform: translateX(-12vmax)} to{ transform: translateX(12vmax)} }
+
+  /* Controls */
+  .controls{ display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:1rem; flex-wrap:wrap; }
+  .filters{ display:flex; gap:.75rem; flex-wrap:wrap; }
+  .filters label,.sort label{ display:flex; gap:.45rem; align-items:center; background:linear-gradient(180deg,#0f172a,#0b1224); border:1px solid var(--stroke); padding:.52rem .7rem; border-radius:999px; color:#dbe4ff; }
+  .filters input,.filters select,.sort select{ color:#eaf0ff; background:transparent; border:1px solid #1d2744; padding:.35rem .55rem; border-radius:.6rem; }
+  .filters input[type="number"]{ width:110px; }
+
+  /* Grid */
+  .grid{ display:grid; gap:1rem; padding:0 1rem 6rem; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .card{ background:linear-gradient(180deg,#0f172a,#0b1122); border:1px solid var(--stroke); border-radius:var(--radius); box-shadow:0 10px 28px rgba(0,0,0,.4); display:flex; flex-direction:column; transition: transform .2s ease, box-shadow .2s ease; overflow:hidden; }
+  .card:hover{ transform: translateY(-4px) scale(1.01); box-shadow:0 18px 44px rgba(0,0,0,.55); }
+  .card img{ width:100%; aspect-ratio: 4/3; object-fit:cover; }
+  .card .body{ padding:.9rem; display:grid; gap:.45rem; }
+  .price{ font-weight:800; color:#ffd6a1; }
+  .rating{ font-size:.92rem; color:#fbbf24; }
+  .small{ font-size:.9rem; color:#b6c2ff; }
+
+  /* Drawer (Cart/Checkout) */
+  .drawer{ position:fixed; right:0; top:0; bottom:0; width:min(440px,95vw); background:linear-gradient(180deg,#111a36,#0f152c); border-left:1px solid var(--stroke); transform: translateX(106%); transition:transform .28s ease; box-shadow:-10px 0 40px rgba(0,0,0,.45); display:grid; grid-template-rows:auto 1fr auto; z-index:45; color:#eaf0ff; }
+  .drawer.open{ transform: translateX(0); }
+  .drawer-header{ display:flex; align-items:center; justify-content:space-between; padding:1rem; border-bottom:1px solid var(--stroke); }
+  .icon-btn{ border:0; background:transparent; cursor:pointer; font-size:1.1rem; color:#eaf0ff; }
+  .cart-items{ padding:1rem; display:grid; gap:.85rem; overflow:auto; }
+  .cart-row{ display:grid; grid-template-columns: 64px 1fr auto; gap:.6rem; align-items:center; background:linear-gradient(180deg,#0f172a,#0b1122); border:1px solid var(--stroke); padding:.5rem; border-radius:.8rem; }
+  .cart-row img{ width:64px; height:64px; object-fit:cover; border-radius:.6rem; }
+  .checkout{ border-top:1px solid var(--stroke); padding:1rem; display:grid; gap:.65rem; }
+  .wide{ width:100%; }
+
+  /* Footer */
+  .footer{ padding:2.1rem 1rem; background:#0a0f1e; border-top:1px solid var(--stroke); color:#cfe0ff; display:grid; place-items:center; gap:.7rem; }
+  .footer .social{ display:flex; gap:.9rem; }
+  .footer a{ font-size:1.18rem; }
+
+  /* Modals */
+  ::backdrop{ background: rgba(2,6,23,.55); }
+  dialog{ border:1px solid var(--stroke); background:linear-gradient(180deg,#0f172a,#0b1224); border-radius:var(--radius); padding:0; box-shadow:0 28px 80px rgba(0,0,0,.65); color:#eaf0ff; }
+  .modal-body{ display:grid; gap:.7rem; padding:1rem; width:min(480px,95vw); }
+  .modal-body input,.modal-body select{ padding:.65rem .75rem; border:1px solid #1d2744; border-radius:.65rem; width:100%; background:#0b1324; color:#eaf0ff; }
+  .muted{ color:#b6c2ff; font-size:.9rem; }
+
+  /* Responsive */
+  @media (max-width: 860px){
+    .topbar{ grid-template-columns: 1fr auto auto; }
+    .search{ grid-column: 1 / -1; order:2; }
+    .hero{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="glow" aria-hidden="true"></div>
+
+<!-- Top Bar -->
+<header class="topbar">
+  <a class="brand" href="#">
+    <div class="badge-lg">AU</div><strong>Ambrose<span>UG</span></strong>
+  </a>
+
+  <form id="searchForm" class="search" role="search">
+    <input id="searchInput" type="search" placeholder="Search products, brands & more…" aria-label="Search products" />
+    <button type="submit" aria-label="Search">🔍</button>
+  </form>
+
+  <nav class="account-nav" aria-label="Account">
+    <button id="btnLogin" class="ghost">Log in</button>
+    <button id="btnSignup" class="primary">Sign up</button>
+    <button id="btnCart" class="cart" aria-label="Open cart">🛒<span id="cartCount" class="badge">0</span></button>
+  </nav>
+</header>
+
+<!-- Category Chips -->
+<section class="categories" aria-label="Categories">
+  <button data-cat="all" class="chip active">All</button>
+  <button data-cat="electronics" class="chip">Electronics</button>
+  <button data-cat="fashion" class="chip">Fashion</button>
+  <button data-cat="home_kitchen" class="chip">Home & Kitchen</button>
+  <button data-cat="beauty" class="chip">Beauty</button>
+  <button data-cat="health" class="chip">Health</button>
+  <button data-cat="baby_toys" class="chip">Baby & Toys</button>
+  <button data-cat="sports" class="chip">Sports</button>
+  <button data-cat="automotive" class="chip">Automotive</button>
+  <button data-cat="gaming" class="chip">Gaming</button>
+  <button data-cat="books" class="chip">Books & Stationery</button>
+  <button data-cat="pet_care" class="chip">Pet Care</button>
+  <button data-cat="outdoor_garden" class="chip">Outdoor & Garden</button>
+  <button data-cat="music" class="chip">Music</button>
+  <button data-cat="art" class="chip">Art & Collectibles</button>
+</section>
+
+<!-- Hero -->
+<section class="hero" aria-label="Hero promotions">
+  <div class="hero-card">
+    <h1>Shop Uganda’s Best — AmbroseUG 🇺🇬</h1>
+    <p>Electronics, dresses, home essentials & more. Pick your region for faster pickup & delivery.</p>
+    <a href="#grid" class="primary cta">Shop Now</a>
+  </div>
+  <div class="hero-graphic" aria-hidden="true">
+    <div class="orb"></div>
+    <div class="orb2"></div>
+  </div>
+</section>
+
+<!-- Controls -->
+<section class="controls" aria-label="Search filters and sorting">
+  <div class="filters">
+    <label> Price (UGX):
+      <input type="number" id="minPrice" placeholder="Min" min="0">
+      <span>–</span>
+      <input type="number" id="maxPrice" placeholder="Max" min="0">
+    </label>
+
+    <label> Rating:
+      <select id="ratingFilter">
+        <option value="">Any</option>
+        <option value="4">4★ & up</option>
+        <option value="3">3★ & up</option>
+        <option value="2">2★ & up</option>
+      </select>
+    </label>
+
+    <label> In Stock:
+      <input id="inStockOnly" type="checkbox">
+    </label>
+  </div>
+
+  <div class="sort">
+    <label> Sort by:
+      <select id="sortBy">
+        <option value="relevance">Relevance</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="rating_desc">Top Rated</option>
+        <option value="newest">Newest</option>
+      </select>
+    </label>
+  </div>
+</section>
+
+<!-- Grid -->
+<main id="grid" class="grid" aria-live="polite" aria-busy="false"></main>
+
+<!-- Cart / Checkout Drawer -->
+<aside id="cartDrawer" class="drawer" aria-hidden="true" aria-label="Cart and checkout">
+  <header class="drawer-header">
+    <h2>Cart — AmbroseUG</h2>
+    <button id="closeCart" class="icon-btn" aria-label="Close cart">✕</button>
+  </header>
+
+  <div id="cartItems" class="cart-items"></div>
+
+  <div class="checkout">
+    <h3>Pickup Station</h3>
+    <p class="small">Choose region & station for your order.</p>
+    <label>
+      Region
+      <select id="pickupRegion">
+        <option value="central">Central</option>
+        <option value="eastern">Eastern</option>
+        <option value="northern">Northern</option>
+        <option value="western">Western</option>
+        <option value="southern">Southern</option>
+      </select>
+    </label>
+
+    <label>
+      Station
+      <select id="pickupStation"></select>
+    </label>
+
+    <button id="btnCheckout" class="primary wide">Place Order</button>
+    <p id="checkoutMsg" class="muted"></p>
+  </div>
+</aside>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="social">
+    <a href="#" aria-label="Facebook" rel="noopener">📘</a>
+    <a href="#" aria-label="Instagram" rel="noopener">📸</a>
+    <a href="#" aria-label="X / Twitter" rel="noopener">🐦</a>
+    <a href="#" aria-label="TikTok" rel="noopener">🎵</a>
+    <a href="#" aria-label="YouTube" rel="noopener">▶️</a>
+    <a href="#" aria-label="WhatsApp" rel="noopener">💬</a>
+  </div>
+  <small>© <span id="year"></span> AmbroseUG. All rights reserved.</small>
+</footer>
+
+<!-- Auth Modals -->
+<dialog id="loginModal" aria-labelledby="loginTitle">
+  <form method="dialog" class="modal-body" id="loginForm" novalidate>
+    <h3 id="loginTitle">Log in to AmbroseUG</h3>
+    <label>Email <input type="email" id="loginEmail" required></label>
+    <label>Password <input type="password" id="loginPassword" required minlength="6"></label>
+    <label>Region (Uganda)
+      <select id="loginRegion" required>
+        <option value="">Select region</option>
+        <option value="central">Central</option>
+        <option value="eastern">Eastern</option>
+        <option value="northern">Northern</option>
+        <option value="western">Western</option>
+        <option value="southern">Southern</option>
+      </select>
+    </label>
+    <button class="primary" type="submit">Log in</button>
+    <button class="ghost" value="cancel">Cancel</button>
+    <p class="muted">No account? <a href="#" id="openSignupFromLogin">Create one</a></p>
+  </form>
+</dialog>
+
+<dialog id="signupModal" aria-labelledby="signupTitle">
+  <form method="dialog" class="modal-body" id="signupForm" novalidate>
+    <h3 id="signupTitle">Create account — AmbroseUG</h3>
+    <label>Name <input type="text" id="signupName" required></label>
+    <label>Email <input type="email" id="signupEmail" required></label>
+    <label>Password <input type="password" id="signupPassword" required minlength="6" aria-describedby="pwdHint"></label>
+    <small id="pwdHint" class="muted">Min 6 chars. Use a strong password.</small>
+    <label>Region (Uganda)
+      <select id="signupRegion" required>
+        <option value="">Select region</option>
+        <option value="central">Central</option>
+        <option value="eastern">Eastern</option>
+        <option value="northern">Northern</option>
+        <option value="western">Western</option>
+        <option value="southern">Southern</option>
+      </select>
+    </label>
+    <button class="primary" type="submit">Sign up</button>
+    <button class="ghost" value="cancel">Cancel</button>
+    <p class="muted">By creating an account you agree to our <a href="#">Terms</a> & <a href="#">Privacy</a>.</p>
+  </form>
+</dialog>
+
+<script>
+  /* ===== Helpers ===== */
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+
+  const stationsByRegion = {
+    central: ["Kampala – CPS Pickup", "Wandegeya Point", "Ntinda Complex", "Nakawa Market Hub", "Entebbe Victoria Mall", "Kira Town Station"],
+    eastern: ["Jinja Main Street", "Mbale Clock Tower", "Soroti Mall", "Tororo Central", "Iganga Station"],
+    northern: ["Gulu Main Market", "Lira Rail Station", "Arua Avenue", "Kitgum Yard", "Nebbi Plaza"],
+    western: ["Mbarara High Street", "Fort Portal Central", "Kabale Road", "Hoima City Hub", "Bushenyi Station"],
+    southern: ["Masaka Liberation Square", "Mbarara South Gate", "Kyotera Plaza", "Lyantonde Stop"]
+  };
+
+  /* ===== Large Sample Catalog ===== */
+  // Picsum placeholders (seeded) used for demo.
+  const CATALOG = [
+    // Electronics
+    {id:"el1",name:"Samsung Galaxy A15",category:"electronics",price:650000,rating:4.3,reviews:120,inStock:true,image:"https://picsum.photos/seed/galaxyA15/640/480"},
+    {id:"el2",name:"iPhone 13 (128GB)",category:"electronics",price:2400000,rating:4.7,reviews:540,inStock:true,image:"https://picsum.photos/seed/iphone13/640/480"},
+    {id:"el3",name:"HP 15s Laptop i5",category:"electronics",price:2200000,rating:4.4,reviews:230,inStock:true,image:"https://picsum.photos/seed/hp15s/640/480"},
+    {id:"el4",name:"Lenovo ThinkPad E14",category:"electronics",price:2800000,rating:4.6,reviews:180,inStock:false,image:"https://picsum.photos/seed/thinkpad/640/480"},
+    {id:"el5",name:"Anker Soundcore Headphones",category:"electronics",price:180000,rating:4.5,reviews:430,inStock:true,image:"https://picsum.photos/seed/soundcore/640/480"},
+    {id:"el6",name:"Samsung 55\" 4K Smart TV",category:"electronics",price:2300000,rating:4.6,reviews:95,inStock:true,image:"https://picsum.photos/seed/55tv/640/480"},
+    {id:"el7",name:"Canon EOS M50 Mark II",category:"electronics",price:3200000,rating:4.7,reviews:70,inStock:true,image:"https://picsum.photos/seed/canonm50/640/480"},
+    {id:"el8",name:"Apple Watch SE",category:"electronics",price:1200000,rating:4.4,reviews:350,inStock:true,image:"https://picsum.photos/seed/awse/640/480"},
+    {id:"el9",name:"Xiaomi Redmi Note 12",category:"electronics",price:900000,rating:4.3,reviews:210,inStock:true,image:"https://picsum.photos/seed/redmi12/640/480"},
+    {id:"el10",name:"Tecno Spark 10",category:"electronics",price:650000,rating:4.1,reviews:160,inStock:true,image:"https://picsum.photos/seed/tecnos10/640/480"},
+
+    // Fashion
+    {id:"fa1",name:"Women's Floral Dress",category:"fashion",price:90000,rating:4.1,reviews:210,inStock:true,image:"https://picsum.photos/seed/floraldress/640/480"},
+    {id:"fa2",name:"Men's Classic Shirt",category:"fashion",price:65000,rating:4.2,reviews:160,inStock:true,image:"https://picsum.photos/seed/mensshirt/640/480"},
+    {id:"fa3",name:"Men's Sneakers",category:"fashion",price:120000,rating:4.3,reviews:310,inStock:true,image:"https://picsum.photos/seed/sneakers/640/480"},
+    {id:"fa4",name:"Ladies Heels",category:"fashion",price:150000,rating:4.0,reviews:98,inStock:false,image:"https://picsum.photos/seed/heels/640/480"},
+    {id:"fa5",name:"Kids T-Shirt Pack (3)",category:"fashion",price:55000,rating:4.2,reviews:60,inStock:true,image:"https://picsum.photos/seed/kidstee/640/480"},
+    {id:"fa6",name:"Denim Jacket Unisex",category:"fashion",price:110000,rating:4.4,reviews:130,inStock:true,image:"https://picsum.photos/seed/denimjacket/640/480"},
+    {id:"fa7",name:"Maxi Satin Dress",category:"fashion",price:140000,rating:4.5,reviews:98,inStock:true,image:"https://picsum.photos/seed/maxisatin/640/480"},
+
+    // Home & Kitchen
+    {id:"hk1",name:"Non-stick Cookware Set (7pc)",category:"home_kitchen",price:230000,rating:4.4,reviews:88,inStock:true,image:"https://picsum.photos/seed/cookware/640/480"},
+    {id:"hk2",name:"Air Fryer 5L",category:"home_kitchen",price:320000,rating:4.5,reviews:190,inStock:true,image:"https://picsum.photos/seed/airfryer/640/480"},
+    {id:"hk3",name:"Memory Foam Pillow",category:"home_kitchen",price:70000,rating:4.3,reviews:140,inStock:true,image:"https://picsum.photos/seed/pillow/640/480"},
+    {id:"hk4",name:"Queen Bed Duvet Set",category:"home_kitchen",price:180000,rating:4.4,reviews:90,inStock:true,image:"https://picsum.photos/seed/duvet/640/480"},
+    {id:"hk5",name:"Electric Kettle 1.8L",category:"home_kitchen",price:65000,rating:4.2,reviews:210,inStock:true,image:"https://picsum.photos/seed/kettle/640/480"},
+
+    // Beauty & Personal Care
+    {id:"be1",name:"Moisturizing Face Cream",category:"beauty",price:45000,rating:4.3,reviews:210,inStock:true,image:"https://picsum.photos/seed/facecream/640/480"},
+    {id:"be2",name:"Hair Dryer 2000W",category:"beauty",price:95000,rating:4.2,reviews:75,inStock:true,image:"https://picsum.photos/seed/hairdryer/640/480"},
+    {id:"be3",name:"Makeup Brush Set (12)",category:"beauty",price:60000,rating:4.1,reviews:66,inStock:true,image:"https://picsum.photos/seed/brushes/640/480"},
+    {id:"be4",name:"Beard Grooming Kit",category:"beauty",price:80000,rating:4.2,reviews:58,inStock:true,image:"https://picsum.photos/seed/beardkit/640/480"},
+    {id:"be5",name:"Ceramic Hair Straightener",category:"beauty",price:115000,rating:4.4,reviews:102,inStock:true,image:"https://picsum.photos/seed/straightener/640/480"},
+
+    // Health & Wellness
+    {id:"he1",name:"Digital Blood Pressure Monitor",category:"health",price:135000,rating:4.5,reviews:120,inStock:true,image:"https://picsum.photos/seed/bpmonitor/640/480"},
+    {id:"he2",name:"Yoga Mat (10mm)",category:"health",price:65000,rating:4.4,reviews:180,inStock:true,image:"https://picsum.photos/seed/yogamat/640/480"},
+    {id:"he3",name:"Multivitamin Gummies",category:"health",price:45000,rating:4.1,reviews:90,inStock:true,image:"https://picsum.photos/seed/gummies/640/480"},
+    {id:"he4",name:"Digital Thermometer",category:"health",price:28000,rating:4.2,reviews:75,inStock:true,image:"https://picsum.photos/seed/thermo/640/480"},
+
+    // Baby, Kids & Toys
+    {id:"bt1",name:"Baby Stroller",category:"baby_toys",price:480000,rating:4.3,reviews:54,inStock:true,image:"https://picsum.photos/seed/stroller/640/480"},
+    {id:"bt2",name:"LEGO Classic Box",category:"baby_toys",price:150000,rating:4.8,reviews:340,inStock:true,image:"https://picsum.photos/seed/lego/640/480"},
+    {id:"bt3",name:"Baby Diapers Jumbo Pack",category:"baby_toys",price:85000,rating:4.4,reviews:210,inStock:true,image:"https://picsum.photos/seed/diapers/640/480"},
+    {id:"bt4",name:"Kids Tricycle",category:"baby_toys",price:140000,rating:4.3,reviews:80,inStock:true,image:"https://picsum.photos/seed/tricycle/640/480"},
+
+    // Sports & Fitness
+    {id:"sp1",name:"Football Size 5",category:"sports",price:45000,rating:4.2,reviews:95,inStock:true,image:"https://picsum.photos/seed/football/640/480"},
+    {id:"sp2",name:"Adjustable Dumbbells (20kg)",category:"sports",price:260000,rating:4.6,reviews:130,inStock:true,image:"https://picsum.photos/seed/dumbbells/640/480"},
+    {id:"sp3",name:"Running Shoes",category:"sports",price:170000,rating:4.4,reviews:210,inStock:true,image:"https://picsum.photos/seed/runnings/640/480"},
+    {id:"sp4",name:"Skipping Rope",category:"sports",price:25000,rating:4.0,reviews:60,inStock:true,image:"https://picsum.photos/seed/skipping/640/480"},
+
+    // Automotive
+    {id:"au1",name:"Car Vacuum Cleaner",category:"automotive",price:80000,rating:4.1,reviews:60,inStock:true,image:"https://picsum.photos/seed/carvac/640/480"},
+    {id:"au2",name:"Motorcycle Helmet",category:"automotive",price:120000,rating:4.4,reviews:90,inStock:true,image:"https://picsum.photos/seed/helmet/640/480"},
+    {id:"au3",name:"Car Phone Mount",category:"automotive",price:35000,rating:4.2,reviews:120,inStock:true,image:"https://picsum.photos/seed/phonemount/640/480"},
+    {id:"au4",name:"Dash Camera FHD",category:"automotive",price:180000,rating:4.3,reviews:70,inStock:true,image:"https://picsum.photos/seed/dashcam/640/480"},
+
+    // Gaming
+    {id:"ga1",name:"PS5 Console",category:"gaming",price:3600000,rating:4.9,reviews:500,inStock:true,image:"https://picsum.photos/seed/ps5/640/480"},
+    {id:"ga2",name:"Xbox Controller",category:"gaming",price:250000,rating:4.6,reviews:210,inStock:true,image:"https://picsum.photos/seed/xboxpad/640/480"},
+    {id:"ga3",name:"Gaming Headset",category:"gaming",price:180000,rating:4.6,reviews:420,inStock:false,image:"https://picsum.photos/seed/headset/640/480"},
+    {id:"ga4",name:"Nintendo Switch OLED",category:"gaming",price:2100000,rating:4.7,reviews:310,inStock:true,image:"https://picsum.photos/seed/switch/640/480"},
+
+    // Books & Stationery
+    {id:"bo1",name:"A5 Notebook (200p)",category:"books",price:18000,rating:4.2,reviews:70,inStock:true,image:"https://picsum.photos/seed/notebook/640/480"},
+    {id:"bo2",name:"Bestseller Novel",category:"books",price:35000,rating:4.3,reviews:200,inStock:true,image:"https://picsum.photos/seed/novel/640/480"},
+    {id:"bo3",name:"Office Pens (10)",category:"books",price:12000,rating:4.1,reviews:85,inStock:true,image:"https://picsum.photos/seed/pens/640/480"},
+    {id:"bo4",name:"Academic Planner 2025",category:"books",price:28000,rating:4.2,reviews:66,inStock:true,image:"https://picsum.photos/seed/planner/640/480"},
+
+    // Pet Care
+    {id:"pc1",name:"Dog Dry Food 5kg",category:"pet_care",price:95000,rating:4.4,reviews:60,inStock:true,image:"https://picsum.photos/seed/dogfood/640/480"},
+    {id:"pc2",name:"Cat Litter 10L",category:"pet_care",price:70000,rating:4.3,reviews:55,inStock:true,image:"https://picsum.photos/seed/catlitter/640/480"},
+    {id:"pc3",name:"Pet Grooming Kit",category:"pet_care",price:65000,rating:4.1,reviews:40,inStock:true,image:"https://picsum.photos/seed/petgroom/640/480"},
+
+    // Outdoor & Garden
+    {id:"og1",name:"Garden Hose 20m",category:"outdoor_garden",price:65000,rating:4.0,reviews:44,inStock:true,image:"https://picsum.photos/seed/hose/640/480"},
+    {id:"og2",name:"Camping Tent (4P)",category:"outdoor_garden",price:350000,rating:4.5,reviews:100,inStock:true,image:"https://picsum.photos/seed/tent/640/480"},
+    {id:"og3",name:"Charcoal Grill",category:"outdoor_garden",price:190000,rating:4.2,reviews:85,inStock:true,image:"https://picsum.photos/seed/grill/640/480"},
+
+    // Music
+    {id:"mu1",name:"Acoustic Guitar",category:"music",price:320000,rating:4.4,reviews:85,inStock:true,image:"https://picsum.photos/seed/guitar/640/480"},
+    {id:"mu2",name:"USB Microphone",category:"music",price:220000,rating:4.5,reviews:120,inStock:true,image:"https://picsum.photos/seed/mic/640/480"},
+    {id:"mu3",name:"Digital Piano 61 Keys",category:"music",price:680000,rating:4.3,reviews:60,inStock:true,image:"https://picsum.photos/seed/piano/640/480"},
+
+    // Art & Collectibles
+    {id:"ar1",name:"Canvas Wall Art 60x90",category:"art",price:150000,rating:4.2,reviews:35,inStock:true,image:"https://picsum.photos/seed/canvas/640/480"},
+    {id:"ar2",name:"Handcrafted Vase",category:"art",price:85000,rating:4.1,reviews:22,inStock:true,image:"https://picsum.photos/seed/vase/640/480"},
+    {id:"ar3",name:"Wood Carving (Ankole)",category:"art",price:210000,rating:4.5,reviews:40,inStock:true,image:"https://picsum.photos/seed/ankole/640/480"}
+  ];
+
+  /* ===== State ===== */
+  const state = {
+    products: [],
+    cart: [],
+    token: null,
+    userRegion: null
+  };
+
+  /* ===== Init ===== */
+  document.addEventListener('DOMContentLoaded', () => {
+    $("#year").textContent = new Date().getFullYear();
+
+    // Category switching
+    $$(".chip").forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        $$(".chip").forEach(c=>c.classList.remove('active'));
+        chip.classList.add('active');
+        renderProducts();
+      });
+    });
+
+    // Search
+    $("#searchForm").addEventListener('submit', (e)=>{
+      e.preventDefault(); renderProducts();
+    });
+
+    // Filters & Sort
+    ["minPrice","maxPrice","ratingFilter","inStockOnly","sortBy"].forEach(id=>{
+      const el = $("#"+id);
+      el.addEventListener('change', renderProducts);
+      if(id.includes('Price')) el.addEventListener('input', debounce(renderProducts, 300));
+    });
+
+    // Drawer
+    $("#btnCart").addEventListener('click', ()=>toggleDrawer(true));
+    $("#closeCart").addEventListener('click', ()=>toggleDrawer(false));
+
+    // Auth
+    $("#btnLogin").addEventListener('click', ()=>$("#loginModal").showModal());
+    $("#btnSignup").addEventListener('click', ()=>$("#signupModal").showModal());
+    $("#openSignupFromLogin").addEventListener('click', (e)=>{ e.preventDefault(); $("#loginModal").close(); $("#signupModal").showModal(); });
+
+    $("#signupForm").addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const region = $("#signupRegion").value;
+      if(!region) return alert("Please select your region.");
+      state.token = "demo-token";
+      state.userRegion = region;
+      $("#signupModal").close();
+      alert("Account created!");
+    });
+
+    $("#loginForm").addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const region = $("#loginRegion").value;
+      if(!region) return alert("Please select your region.");
+      state.token = "demo-token";
+      state.userRegion = region;
+      $("#loginModal").close();
+      alert("Logged in!");
+    });
+
+    // Pickup region -> stations
+    const regionSelect = $("#pickupRegion");
+    const stationSelect = $("#pickupStation");
+    const renderStations = ()=>{
+      stationSelect.innerHTML = "";
+      (stationsByRegion[regionSelect.value]||[]).forEach(name=>{
+        const o = document.createElement('option'); o.value=name; o.textContent=name; stationSelect.appendChild(o);
+      });
+    };
+    regionSelect.addEventListener('change', renderStations);
+    renderStations();
+
+    // First load
+    state.products = CATALOG.map((p,i)=>({...p, createdAt: Date.now() - i*86400000}));
+    renderProducts();
+  });
+
+  /* ===== Rendering ===== */
+  function renderProducts(){
+    const grid = $("#grid");
+    grid.setAttribute('aria-busy','true');
+    grid.innerHTML = "";
+
+    const activeCat = $(".chip.active")?.dataset.cat || "all";
+    const q = ($("#searchInput").value||"").toLowerCase();
+    const min = Number($("#minPrice").value||0);
+    const max = Number($("#maxPrice").value||Infinity);
+    const rating = Number($("#ratingFilter").value||0);
+    const inStockOnly = $("#inStockOnly").checked;
+    const sort = $("#sortBy").value;
+
+    let items = state.products.filter(p=>{
+      const byCat = activeCat==="all" || p.category===activeCat;
+      const bySearch = !q || p.name.toLowerCase().includes(q);
+      const byPrice = (p.price>=min) && (p.price<=max);
+      const byRating = p.rating >= rating;
+      const byStock = !inStockOnly || p.inStock;
+      return byCat && bySearch && byPrice && byRating && byStock;
+    });
+
+    // Sort
+    const sortMap = {
+      price_asc: (a,b)=>a.price-b.price,
+      price_desc: (a,b)=>b.price-a.price,
+      rating_desc: (a,b)=> b.rating - a.rating || b.reviews - a.reviews,
+      newest: (a,b)=> b.createdAt - a.createdAt,
+      relevance: ()=>0
+    };
+    items = items.sort(sortMap[sort] || sortMap.relevance);
+
+    // Render
+    const frag = document.createDocumentFragment();
+    items.forEach(p=>{
+      const card = document.createElement('article');
+      card.className="card";
+      card.innerHTML = `
+        <img src="${p.image}" alt="${p.name}">
+        <div class="body">
+          <strong>${p.name}</strong>
+          <div class="rating">${"★".repeat(Math.round(p.rating))}${"☆".repeat(5-Math.round(p.rating))} <span class="small">(${p.reviews||0})</span></div>
+          <div class="price">UGX ${Number(p.price).toLocaleString()}</div>
+          <button class="primary add-btn">Add to cart</button>
+          <div class="small">${labelForCategory(p.category)}</div>
+        </div>
+      `;
+      card.querySelector(".add-btn").addEventListener('click', ()=>{ addToCart(p); });
+      frag.appendChild(card);
+    });
+    grid.appendChild(frag);
+    grid.setAttribute('aria-busy','false');
+  }
+
+  function labelForCategory(cat){
+    const map = {
+      electronics:"Electronics",
+      fashion:"Fashion",
+      home_kitchen:"Home & Kitchen",
+      beauty:"Beauty & Personal Care",
+      health:"Health & Wellness",
+      baby_toys:"Baby, Kids & Toys",
+      sports:"Sports & Fitness",
+      automotive:"Automotive",
+      gaming:"Gaming",
+      books:"Books & Stationery",
+      pet_care:"Pet Care",
+      outdoor_garden:"Outdoor & Garden",
+      music:"Music",
+      art:"Art & Collectibles"
+    };
+    return map[cat]||cat;
+  }
+
+  /* ===== Cart ===== */
+  function addToCart(prod){
+    const found = state.cart.find(i=>i.id===prod.id);
+    if(found) found.qty += 1;
+    else state.cart.push({id: prod.id, name: prod.name, price: prod.price, image: prod.image, qty:1});
+    updateCartUI();
+    toggleDrawer(true);
+  }
+
+  function updateCartUI(){
+    $("#cartCount").textContent = state.cart.reduce((a,b)=>a+b.qty,0);
+    const wrap = $("#cartItems");
+    if(!state.cart.length){ wrap.innerHTML = `<p class="muted">Your cart is empty.</p>`; return; }
+    wrap.innerHTML = "";
+    state.cart.forEach(item=>{
+      const row = document.createElement('div');
+      row.className="cart-row";
+      row.innerHTML = `
+        <img src="${item.image}" alt="">
+        <div>
+          <div><strong>${item.name}</strong></div>
+          <div class="muted">UGX ${Number(item.price).toLocaleString()}</div>
+        </div>
+        <div>
+          <button class="icon-btn" aria-label="Decrease">➖</button>
+          <span>${item.qty}</span>
+          <button class="icon-btn" aria-label="Increase">➕</button>
+        </div>
+      `;
+      const [dec,,inc] = row.querySelectorAll('button,span');
+      dec.addEventListener('click', ()=>{ item.qty=Math.max(0,item.qty-1); if(item.qty===0){ state.cart=state.cart.filter(i=>i.id!==item.id); } updateCartUI(); });
+      inc.addEventListener('click', ()=>{ item.qty+=1; updateCartUI(); });
+      wrap.appendChild(row);
+    });
+  }
+
+  function toggleDrawer(open){ $("#cartDrawer").classList.toggle('open', !!open); }
+
+  /* ===== Checkout (front-end demo) ===== */
+  $("#btnCheckout")?.addEventListener('click', ()=>{
+    if(!state.token){ $("#loginModal").showModal(); return; }
+    if(!state.cart.length){ $("#checkoutMsg").textContent = "Your cart is empty."; return; }
+    const station = $("#pickupStation").value;
+    const total = state.cart.reduce((s,i)=>s+i.price*i.qty,0);
+    $("#checkoutMsg").textContent = `Order placed for UGX ${total.toLocaleString()} — Pickup: ${station}`;
+    state.cart = [];
+    updateCartUI();
+  });
+
+  /* ===== Utilities ===== */
+  function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a),ms); }; }
+
+  // set year
+  document.addEventListener('DOMContentLoaded', ()=>{ $("#year").textContent = new Date().getFullYear(); });
+</script>
+</body>
+</html>
